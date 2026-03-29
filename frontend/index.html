@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Structural Intelligence System</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap');
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --border: #1e1e2e;
+    --accent: #ff6b2b;
+    --accent2: #00d4aa;
+    --accent3: #7c6af7;
+    --text: #e8e8f0;
+    --text-dim: #6b6b80;
+    --load-bearing: #ff6b2b;
+    --partition: #00d4aa;
+    --slab: #7c6af7;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.2rem 2rem;
+    border-bottom: 1px solid var(--border);
+    background: rgba(10,10,15,0.95);
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.1rem;
+    letter-spacing: 0.05em;
+  }
+  .logo span { color: var(--accent); }
+
+  .status-pill {
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.35rem 0.9rem;
+    background: rgba(0,212,170,0.08);
+    border: 1px solid rgba(0,212,170,0.25);
+    border-radius: 100px;
+    font-size: 0.7rem;
+    color: var(--accent2);
+  }
+  .status-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent2);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* ── LAYOUT ── */
+  .app {
+    display: grid;
+    grid-template-columns: 340px 1fr 320px;
+    grid-template-rows: 100vh;
+    padding-top: 60px;
+    height: 100vh;
+  }
+
+  /* ── LEFT PANEL ── */
+  .panel-left {
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    background: var(--surface);
+  }
+
+  .section-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+
+  /* Upload zone */
+  .upload-zone {
+    border: 1.5px dashed var(--border);
+    border-radius: 8px;
+    padding: 2rem 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .upload-zone:hover { border-color: var(--accent); background: rgba(255,107,43,0.04); }
+  .upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .upload-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+  .upload-text { font-size: 0.7rem; color: var(--text-dim); }
+  .upload-text strong { color: var(--accent); }
+
+  /* Buttons */
+  .btn {
+    display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border: none; border-radius: 6px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 100%;
+    letter-spacing: 0.05em;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+  }
+  .btn-primary:hover { background: #e55a1f; transform: translateY(-1px); }
+  .btn-secondary {
+    background: transparent;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { border-color: var(--accent2); color: var(--accent2); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  /* Room list */
+  .room-list { display: flex; flex-direction: column; gap: 0.4rem; }
+  .room-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.5rem 0.75rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.68rem;
+  }
+  .room-label { color: var(--text-dim); }
+  .room-count {
+    background: rgba(124,106,247,0.15);
+    color: var(--accent3);
+    padding: 0.15rem 0.5rem;
+    border-radius: 100px;
+    font-size: 0.6rem;
+  }
+
+  /* Legend */
+  .legend { display: flex; flex-direction: column; gap: 0.5rem; }
+  .legend-item { display: flex; align-items: center; gap: 0.6rem; font-size: 0.68rem; }
+  .legend-color { width: 20px; height: 4px; border-radius: 2px; flex-shrink: 0; }
+
+  /* ── CENTER: 3D CANVAS ── */
+  .canvas-area {
+    position: relative;
+    background: radial-gradient(ellipse at 50% 30%, #111124 0%, #0a0a0f 70%);
+    overflow: hidden;
+  }
+
+  #three-canvas { width: 100%; height: 100%; display: block; }
+
+  .canvas-overlay {
+    position: absolute;
+    bottom: 1.5rem; left: 50%;
+    transform: translateX(-50%);
+    display: flex; gap: 0.5rem;
+  }
+
+  .cam-btn {
+    padding: 0.4rem 0.8rem;
+    background: rgba(18,18,26,0.85);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-dim);
+    font-size: 0.65rem;
+    cursor: pointer;
+    font-family: 'Space Mono', monospace;
+    transition: all 0.15s;
+    backdrop-filter: blur(8px);
+  }
+  .cam-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+
+  .loading-overlay {
+    position: absolute; inset: 0;
+    background: rgba(10,10,15,0.9);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    transition: opacity 0.3s;
+    backdrop-filter: blur(4px);
+  }
+  .loading-overlay.hidden { opacity: 0; pointer-events: none; }
+  .spinner {
+    width: 36px; height: 36px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── RIGHT PANEL ── */
+  .panel-right {
+    border-left: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    background: var(--surface);
+  }
+
+  /* Stats grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+  }
+  .stat-card {
+    padding: 0.85rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .stat-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .stat-label { font-size: 0.6rem; color: var(--text-dim); margin-top: 0.25rem; }
+
+  /* Material cards */
+  .material-list { display: flex; flex-direction: column; gap: 0.6rem; }
+  .material-card {
+    padding: 0.85rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+  .material-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--accent);
+  }
+  .material-card.partition::before { background: var(--accent2); }
+  .material-card.slab::before { background: var(--accent3); }
+
+  .mat-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 0.4rem;
+  }
+  .mat-name { font-size: 0.75rem; font-weight: 700; }
+  .mat-score {
+    font-size: 0.65rem;
+    background: rgba(255,107,43,0.12);
+    color: var(--accent);
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+  }
+  .mat-type { font-size: 0.6rem; color: var(--text-dim); margin-bottom: 0.5rem; }
+  .score-bar { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .score-fill { height: 100%; border-radius: 2px; background: var(--accent); transition: width 1s ease; }
+
+  /* Explanation box */
+  .explanation-box {
+    padding: 1rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.65rem;
+    line-height: 1.7;
+    color: var(--text-dim);
+    white-space: pre-wrap;
+  }
+
+  /* Concerns */
+  .concern-item {
+    padding: 0.6rem 0.75rem;
+    background: rgba(255,107,43,0.06);
+    border: 1px solid rgba(255,107,43,0.2);
+    border-radius: 6px;
+    font-size: 0.65rem;
+    color: var(--accent);
+    display: flex; gap: 0.4rem; align-items: flex-start;
+  }
+
+  /* Cost */
+  .cost-display {
+    padding: 1rem;
+    background: linear-gradient(135deg, rgba(124,106,247,0.1), rgba(0,212,170,0.05));
+    border: 1px solid rgba(124,106,247,0.2);
+    border-radius: 8px;
+    text-align: center;
+  }
+  .cost-amount {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--accent3);
+  }
+  .cost-label { font-size: 0.6rem; color: var(--text-dim); margin-top: 0.2rem; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">STRUCTURAL<span>.</span>AI</div>
+  <div class="status-pill">
+    <div class="status-dot"></div>
+    <span id="status-text">READY</span>
+  </div>
+  <div style="font-size:0.65rem;color:var(--text-dim)">PS2 · Autonomous Structural Intelligence</div>
+</header>
+
+<div class="app">
+
+  <!-- LEFT: Controls -->
+  <aside class="panel-left">
+    <div>
+      <div class="section-label">Input</div>
+      <div class="upload-zone" id="upload-zone">
+        <input type="file" id="file-input" accept="image/*" />
+        <div class="upload-icon">🏗</div>
+        <div class="upload-text">Drop floor plan image<br><strong>or click to upload</strong></div>
+        <div id="file-name" style="margin-top:0.5rem;font-size:0.65rem;color:var(--accent2)"></div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:0.5rem">
+      <button class="btn btn-primary" id="btn-parse" onclick="runPipeline(false)">
+        ▶ ANALYZE FLOOR PLAN
+      </button>
+      <button class="btn btn-secondary" onclick="runPipeline(true)">
+        ⚡ USE SAMPLE (Plan B)
+      </button>
+    </div>
+
+    <div>
+      <div class="section-label">Detected Rooms</div>
+      <div class="room-list" id="room-list">
+        <div style="font-size:0.65rem;color:var(--text-dim)">Upload a floor plan to begin</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-label">Legend</div>
+      <div class="legend">
+        <div class="legend-item">
+          <div class="legend-color" style="background:var(--load-bearing)"></div>
+          Load-Bearing Wall
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background:var(--partition)"></div>
+          Partition Wall
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background:var(--accent3)"></div>
+          Slab / Column
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background:#4a8fff"></div>
+          Floor Slab
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-label">View Controls</div>
+      <div style="font-size:0.63rem;color:var(--text-dim);line-height:1.8">
+        🖱 Left drag — Orbit<br>
+        🖱 Right drag — Pan<br>
+        🖱 Scroll — Zoom<br>
+        ⌨ Buttons below canvas
+      </div>
+    </div>
+  </aside>
+
+  <!-- CENTER: 3D Canvas -->
+  <main class="canvas-area">
+    <canvas id="three-canvas"></canvas>
+
+    <div class="loading-overlay" id="loading-overlay">
+      <div class="spinner"></div>
+      <div id="loading-msg">Initializing 3D Engine...</div>
+    </div>
+
+    <div class="canvas-overlay">
+      <button class="cam-btn" onclick="resetCamera()">⟳ Reset View</button>
+      <button class="cam-btn" onclick="setView('top')">⊡ Top</button>
+      <button class="cam-btn" onclick="setView('front')">◫ Front</button>
+      <button class="cam-btn" onclick="setView('iso')">⬡ Iso</button>
+      <button class="cam-btn" onclick="toggleWireframe()">⬜ Wireframe</button>
+    </div>
+  </main>
+
+  <!-- RIGHT: Analysis -->
+  <aside class="panel-right">
+    <div>
+      <div class="section-label">Structure Stats</div>
+      <div class="stats-grid" id="stats-grid">
+        <div class="stat-card"><div class="stat-value" id="stat-walls">—</div><div class="stat-label">Total Walls</div></div>
+        <div class="stat-card"><div class="stat-value" id="stat-lb">—</div><div class="stat-label">Load-Bearing</div></div>
+        <div class="stat-card"><div class="stat-value" id="stat-rooms">—</div><div class="stat-label">Rooms</div></div>
+        <div class="stat-card"><div class="stat-value" id="stat-concerns" style="color:var(--accent)">—</div><div class="stat-label">Concerns</div></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-label">Estimated Cost</div>
+      <div class="cost-display">
+        <div class="cost-amount" id="cost-amount">—</div>
+        <div class="cost-label">ESTIMATED MATERIAL COST (INR)</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-label">Material Recommendations</div>
+      <div class="material-list" id="material-list">
+        <div style="font-size:0.65rem;color:var(--text-dim)">Run analysis to see recommendations</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-label">Structural Concerns</div>
+      <div id="concerns-list">
+        <div style="font-size:0.65rem;color:var(--text-dim)">No concerns detected yet</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-label">AI Explanation</div>
+      <div class="explanation-box" id="explanation-box">
+        Run analysis to see AI-generated structural explanation...
+      </div>
+    </div>
+  </aside>
+</div>
+
+<!-- Three.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ─────────────────────────────────────────────
+// THREE.JS 3D ENGINE — STAGE 3
+// ─────────────────────────────────────────────
+
+let scene, camera, renderer, animId;
+let isWireframe = false;
+let walls3D = [];
+const API = 'http://localhost:8000';
+
+// Init Three.js
+function initThree() {
+  const canvas = document.getElementById('three-canvas');
+  const parent = canvas.parentElement;
+  
+  scene = new THREE.Scene();
+  scene.background = null; // transparent — CSS handles bg
+
+  camera = new THREE.PerspectiveCamera(45, parent.clientWidth / parent.clientHeight, 0.1, 1000);
+  camera.position.set(8, 10, 12);
+
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setSize(parent.clientWidth, parent.clientHeight);
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+  // Lighting
+  const ambient = new THREE.AmbientLight(0xffffff, 0.4);
+  scene.add(ambient);
+
+  const dirLight = new THREE.DirectionalLight(0xfff5e0, 1.2);
+  dirLight.position.set(10, 20, 10);
+  dirLight.castShadow = true;
+  scene.add(dirLight);
+
+  const fillLight = new THREE.DirectionalLight(0x00d4aa, 0.3);
+  fillLight.position.set(-10, 5, -10);
+  scene.add(fillLight);
+
+  // Grid
+  const grid = new THREE.GridHelper(20, 40, 0x1e1e2e, 0x1e1e2e);
+  scene.add(grid);
+
+  // Orbit Controls (manual — no import needed)
+  setupOrbitControls(canvas);
+
+  // Resize handler
+  window.addEventListener('resize', () => {
+    camera.aspect = parent.clientWidth / parent.clientHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(parent.clientWidth, parent.clientHeight);
+  });
+
+  // Hide loading
+  setTimeout(() => {
+    document.getElementById('loading-overlay').classList.add('hidden');
+  }, 600);
+
+  animate();
+}
+
+function animate() {
+  animId = requestAnimationFrame(animate);
+  renderer.render(scene, camera);
+}
+
+// ─────────────────────────────────────────────
+// ORBIT CONTROLS (lightweight manual impl)
+// ─────────────────────────────────────────────
+let isDragging = false, isRightDrag = false;
+let prevMouse = { x: 0, y: 0 };
+let spherical = { theta: Math.PI / 4, phi: Math.PI / 3, radius: 18 };
+let target = new THREE.Vector3(5, 0, 5);
+
+function setupOrbitControls(canvas) {
+  canvas.addEventListener('mousedown', e => {
+    isDragging = true;
+    isRightDrag = e.button === 2;
+    prevMouse = { x: e.clientX, y: e.clientY };
+    e.preventDefault();
+  });
+  canvas.addEventListener('contextmenu', e => e.preventDefault());
+
+  window.addEventListener('mousemove', e => {
+    if (!isDragging) return;
+    const dx = e.clientX - prevMouse.x;
+    const dy = e.clientY - prevMouse.y;
+    prevMouse = { x: e.clientX, y: e.clientY };
+
+    if (isRightDrag) {
+      // Pan
+      const right = new THREE.Vector3();
+      right.crossVectors(camera.getWorldDirection(new THREE.Vector3()), camera.up).normalize();
+      target.addScaledVector(right, -dx * 0.02);
+      target.y += dy * 0.02;
+    } else {
+      // Orbit
+      spherical.theta -= dx * 0.008;
+      spherical.phi = Math.max(0.1, Math.min(Math.PI/2, spherical.phi - dy * 0.008));
+    }
+    updateCamera();
+  });
+
+  window.addEventListener('mouseup', () => isDragging = false);
+
+  canvas.addEventListener('wheel', e => {
+    spherical.radius = Math.max(3, Math.min(40, spherical.radius + e.deltaY * 0.02));
+    updateCamera();
+    e.preventDefault();
+  }, { passive: false });
+}
+
+function updateCamera() {
+  camera.position.set(
+    target.x + spherical.radius * Math.sin(spherical.phi) * Math.sin(spherical.theta),
+    target.y + spherical.radius * Math.cos(spherical.phi),
+    target.z + spherical.radius * Math.sin(spherical.phi) * Math.cos(spherical.theta)
+  );
+  camera.lookAt(target);
+}
+
+// ─────────────────────────────────────────────
+// BUILD 3D MODEL FROM PARSED DATA
+// ─────────────────────────────────────────────
+
+const MAT_COLORS = {
+  LOAD_BEARING: 0xff6b2b,
+  PARTITION:    0x00d4aa,
+  LONG_SPAN:    0xff3366,
+  SLAB:         0x4a8fff,
+  COLUMN:       0x7c6af7,
+};
+
+function buildModel(parsed) {
+  // Clear existing
+  walls3D.forEach(obj => scene.remove(obj));
+  walls3D = [];
+  // Remove floors
+  scene.children.filter(c => c.userData.isFloor || c.userData.isRoom).forEach(c => scene.remove(c));
+
+  const walls = parsed.walls || [];
+  const rooms = parsed.rooms || [];
+  const W = 10; // scale: normalized 0-1 → 10 units
+
+  // Floor slab
+  const floorGeo = new THREE.PlaneGeometry(W, W);
+  const floorMat = new THREE.MeshLambertMaterial({ color: 0x1a1a2a, side: THREE.DoubleSide });
+  const floor = new THREE.Mesh(floorGeo, floorMat);
+  floor.rotation.x = -Math.PI / 2;
+  floor.position.set(W/2, 0, W/2);
+  floor.receiveShadow = true;
+  floor.userData.isFloor = true;
+  scene.add(floor);
+
+  // Room floor pads
+  const roomColors = [0x1a2030, 0x1a2a25, 0x252020, 0x1e1e30, 0x1a2820, 0x28201a];
+  rooms.forEach((room, i) => {
+    const [cx, cy] = room.centroid_normalized || [0.5, 0.5];
+    const geo = new THREE.PlaneGeometry(W * 0.25, W * 0.25);
+    const mat = new THREE.MeshLambertMaterial({ 
+      color: roomColors[i % roomColors.length], 
+      side: THREE.DoubleSide, transparent: true, opacity: 0.6 
+    });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.rotation.x = -Math.PI / 2;
+    mesh.position.set(cx * W, 0.01, cy * W);
+    mesh.userData.isRoom = true;
+    scene.add(mesh);
+  });
+
+  // Walls
+  const WALL_HEIGHT = 3.0;
+  const WALL_THICKNESS = 0.15;
+
+  walls.forEach((wall, i) => {
+    const [x1n, y1n] = wall.start || [0, 0];
+    const [x2n, y2n] = wall.end || [0.1, 0];
+
+    const x1 = x1n * W, z1 = y1n * W;
+    const x2 = x2n * W, z2 = y2n * W;
+    const dx = x2 - x1, dz = z2 - z1;
+    const len = Math.sqrt(dx*dx + dz*dz);
+    if (len < 0.05) return;
+
+    const cls = wall.classification || 'PARTITION';
+    const color = MAT_COLORS[cls] || MAT_COLORS.PARTITION;
+
+    const geo = new THREE.BoxGeometry(len, WALL_HEIGHT, WALL_THICKNESS);
+    const mat = new THREE.MeshLambertMaterial({ color });
+    const mesh = new THREE.Mesh(geo, mat);
+
+    mesh.position.set((x1+x2)/2, WALL_HEIGHT/2, (z1+z2)/2);
+    mesh.rotation.y = -Math.atan2(dz, dx);
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    mesh.userData = { classification: cls, wallIndex: i };
+
+    scene.add(mesh);
+    walls3D.push(mesh);
+
+    // Edge lines for crisp look
+    const edges = new THREE.EdgesGeometry(geo);
+    const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x000000, opacity: 0.3, transparent: true }));
+    mesh.add(line);
+  });
+
+  // Roof edge (transparent)
+  const roofGeo = new THREE.PlaneGeometry(W, W);
+  const roofMat = new THREE.MeshLambertMaterial({ color: 0x7c6af7, transparent: true, opacity: 0.08, side: THREE.DoubleSide });
+  const roof = new THREE.Mesh(roofGeo, roofMat);
+  roof.rotation.x = -Math.PI / 2;
+  roof.position.set(W/2, WALL_HEIGHT, W/2);
+  roof.userData.isFloor = true;
+  scene.add(roof);
+
+  resetCamera();
+}
+
+function resetCamera() {
+  spherical = { theta: Math.PI / 4, phi: Math.PI / 3.2, radius: 18 };
+  target = new THREE.Vector3(5, 1.5, 5);
+  updateCamera();
+}
+
+function setView(view) {
+  if (view === 'top') {
+    spherical = { theta: 0, phi: 0.05, radius: 20 };
+  } else if (view === 'front') {
+    spherical = { theta: 0, phi: Math.PI/2, radius: 18 };
+  } else {
+    spherical = { theta: Math.PI/4, phi: Math.PI/3.2, radius: 18 };
+  }
+  target = new THREE.Vector3(5, 1.5, 5);
+  updateCamera();
+}
+
+function toggleWireframe() {
+  isWireframe = !isWireframe;
+  walls3D.forEach(mesh => {
+    mesh.material.wireframe = isWireframe;
+  });
+}
+
+// ─────────────────────────────────────────────
+// UI UPDATES
+// ─────────────────────────────────────────────
+
+function updateStats(parsed, materials) {
+  const s = parsed.summary || {};
+  document.getElementById('stat-walls').textContent = s.total_walls || walls3D.length || '—';
+  document.getElementById('stat-lb').textContent = s.load_bearing || '—';
+  document.getElementById('stat-rooms').textContent = s.total_rooms || '—';
+  document.getElementById('stat-concerns').textContent = materials?.summary?.total_concerns ?? '—';
+
+  const cost = materials?.estimated_total_cost_inr;
+  document.getElementById('cost-amount').textContent = cost 
+    ? '₹' + Math.round(cost).toLocaleString('en-IN')
+    : '—';
+}
+
+function updateRooms(rooms) {
+  const el = document.getElementById('room-list');
+  if (!rooms || rooms.length === 0) {
+    el.innerHTML = '<div style="font-size:0.65rem;color:var(--text-dim)">No rooms detected</div>';
+    return;
+  }
+  el.innerHTML = rooms.map(r => `
+    <div class="room-item">
+      <span>${r.label || 'ROOM'}</span>
+      <span class="room-count">Detected</span>
+    </div>
+  `).join('');
+}
+
+function updateMaterials(recs) {
+  const el = document.getElementById('material-list');
+  if (!recs || recs.length === 0) {
+    el.innerHTML = '<div style="font-size:0.65rem;color:var(--text-dim)">No data</div>';
+    return;
+  }
+
+  // Show unique element types (one card per type)
+  const seen = new Set();
+  const cards = [];
+  recs.forEach(rec => {
+    if (seen.has(rec.element_type)) return;
+    seen.add(rec.element_type);
+    const top = rec.top_materials?.[0];
+    if (!top) return;
+    const mat = top.material;
+    const score = top.tradeoff_score;
+    const cls = rec.element_type === 'LOAD_BEARING' ? 'load' : rec.element_type === 'PARTITION' ? 'partition' : 'slab';
+    cards.push(`
+      <div class="material-card ${cls}">
+        <div class="mat-header">
+          <div class="mat-name">${mat.name}</div>
+          <div class="mat-score">${(score*100).toFixed(0)}%</div>
+        </div>
+        <div class="mat-type">${rec.element_type.replace('_',' ')} · Span: ${rec.span_m}m</div>
+        <div class="score-bar">
+          <div class="score-fill" style="width:${score*100}%;background:${cls==='partition'?'var(--accent2)':cls==='slab'?'var(--accent3)':'var(--accent)'}"></div>
+        </div>
+        <div style="margin-top:0.4rem;font-size:0.6rem;color:var(--text-dim)">${mat.description}</div>
+      </div>
+    `);
+  });
+  el.innerHTML = cards.join('');
+}
+
+function updateConcerns(recs) {
+  const el = document.getElementById('concerns-list');
+  const concerns = recs?.flatMap(r => r.structural_concerns || []) || [];
+  if (concerns.length === 0) {
+    el.innerHTML = '<div style="font-size:0.65rem;color:var(--accent2)">✓ No structural concerns detected</div>';
+    return;
+  }
+  el.innerHTML = concerns.map(c => `<div class="concern-item">⚠ ${c}</div>`).join('');
+}
+
+function updateExplanation(text) {
+  document.getElementById('explanation-box').textContent = text || 'No explanation available';
+}
+
+function setStatus(msg) {
+  document.getElementById('status-text').textContent = msg;
+}
+
+// ─────────────────────────────────────────────
+// PIPELINE
+// ─────────────────────────────────────────────
+
+async function runPipeline(useSample = false) {
+  const loadingEl = document.getElementById('loading-overlay');
+  const loadingMsg = document.getElementById('loading-msg');
+  loadingEl.classList.remove('hidden');
+
+  const fileInput = document.getElementById('file-input');
+  const file = fileInput.files[0];
+
+  if (!useSample && !file) {
+    alert('Please upload a floor plan image first, or click "Use Sample"');
+    loadingEl.classList.add('hidden');
+    return;
+  }
+
+  setStatus('ANALYZING...');
+
+  try {
+    // Try to call real API, fall back to mock data
+    let data;
+    try {
+      loadingMsg.textContent = 'Stage 1: Parsing floor plan...';
+      const formData = new FormData();
+      if (!useSample && file) formData.append('file', file);
+
+      const endpoint = useSample
+        ? `${API}/api/full-pipeline?use_fallback=true`
+        : `${API}/api/full-pipeline`;
+
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        body: useSample ? null : formData,
+        signal: AbortSignal.timeout(30000)
+      });
+
+      if (!res.ok) throw new Error(`API ${res.status}`);
+      data = await res.json();
+
+    } catch (apiErr) {
+      console.warn('API unavailable, using embedded mock data:', apiErr);
+      loadingMsg.textContent = 'Using embedded demo data...';
+      await new Promise(r => setTimeout(r, 800));
+      data = getMockData();
+    }
+
+    loadingMsg.textContent = 'Stage 3: Building 3D model...';
+    await new Promise(r => setTimeout(r, 300));
+
+    buildModel(data.parsed);
+    updateRooms(data.parsed.rooms);
+    updateStats(data.parsed, data.materials);
+
+    loadingMsg.textContent = 'Stage 4: Material analysis...';
+    await new Promise(r => setTimeout(r, 300));
+
+    updateMaterials(data.materials?.recommendations);
+    updateConcerns(data.materials?.recommendations);
+    updateExplanation(data.materials?.explanation);
+
+    setStatus(data.parsed.fallback_used ? 'DEMO MODE' : 'COMPLETE');
+
+  } catch (err) {
+    console.error(err);
+    setStatus('ERROR');
+    alert('Pipeline error: ' + err.message);
+  }
+
+  loadingEl.classList.add('hidden');
+}
+
+// ─────────────────────────────────────────────
+// MOCK DATA (works without backend)
+// ─────────────────────────────────────────────
+
+function getMockData() {
+  return {
+    parsed: {
+      fallback_used: true,
+      summary: { total_walls: 9, load_bearing: 6, partition: 3, total_rooms: 6, total_openings: 4 },
+      walls: [
+        { start:[0.0,0.0], end:[1.0,0.0], classification:'LOAD_BEARING', span_m:9.0 },
+        { start:[1.0,0.0], end:[1.0,1.0], classification:'LOAD_BEARING', span_m:9.0 },
+        { start:[1.0,1.0], end:[0.0,1.0], classification:'LOAD_BEARING', span_m:9.0 },
+        { start:[0.0,1.0], end:[0.0,0.0], classification:'LOAD_BEARING', span_m:9.0 },
+        { start:[0.5,0.0], end:[0.5,0.6], classification:'LOAD_BEARING', span_m:5.4 },
+        { start:[0.0,0.5], end:[0.5,0.5], classification:'LOAD_BEARING', span_m:4.5 },
+        { start:[0.5,0.5], end:[1.0,0.5], classification:'LOAD_BEARING', span_m:4.5 },
+        { start:[0.25,0.5], end:[0.25,1.0], classification:'PARTITION', span_m:4.5 },
+        { start:[0.75,0.5], end:[0.75,1.0], classification:'PARTITION', span_m:4.5 },
+      ],
+      rooms: [
+        { id:'r0', label:'GREAT_ROOM', centroid_normalized:[0.25,0.25] },
+        { id:'r1', label:'KITCHEN', centroid_normalized:[0.75,0.25] },
+        { id:'r2', label:'BEDROOM_1', centroid_normalized:[0.12,0.75] },
+        { id:'r3', label:'BEDROOM_2', centroid_normalized:[0.37,0.75] },
+        { id:'r4', label:'BEDROOM_3', centroid_normalized:[0.62,0.75] },
+        { id:'r5', label:'BEDROOM_4', centroid_normalized:[0.87,0.75] },
+      ],
+      openings: []
+    },
+    materials: {
+      estimated_total_cost_inr: 285400,
+      recommendations: [
+        {
+          element_type: 'LOAD_BEARING', span_m: 9.0,
+          structural_concerns: ['⚠️ Long unsupported span of 9.0m detected — steel frame or RCC required'],
+          top_materials: [
+            { tradeoff_score: 0.88, material: { name:'RCC', description:'Reinforced concrete — highest structural capacity, ideal for slabs and columns', cost_score:3, strength_score:4, durability_score:4, cost_per_sqm:1200 } },
+            { tradeoff_score: 0.72, material: { name:'Red Brick', description:'Traditional fired clay brick — reliable load-bearing, widely available', cost_score:2, strength_score:3, durability_score:2, cost_per_sqm:650 } },
+          ]
+        },
+        {
+          element_type: 'PARTITION', span_m: 4.5,
+          structural_concerns: [],
+          top_materials: [
+            { tradeoff_score: 0.82, material: { name:'AAC Blocks', description:'Autoclaved Aerated Concrete — lightweight, good insulation, easy to cut', cost_score:1, strength_score:2, durability_score:3, cost_per_sqm:450 } },
+            { tradeoff_score: 0.74, material: { name:'Fly Ash Brick', description:'Eco-friendly industrial byproduct brick — good compressive strength, sustainable', cost_score:1, strength_score:2, durability_score:3, cost_per_sqm:420 } },
+          ]
+        },
+        {
+          element_type: 'SLAB', span_m: 4.0,
+          structural_concerns: [],
+          top_materials: [
+            { tradeoff_score: 0.91, material: { name:'RCC', description:'Best-in-class for floor slabs — very high flexural strength, 50+ year durability', cost_score:3, strength_score:4, durability_score:4, cost_per_sqm:1200 } },
+          ]
+        }
+      ],
+      explanation: `STRUCTURAL MATERIAL ANALYSIS — PLAN B (4 Bedrooms / 3 Bathrooms)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+OVERALL STRATEGY:
+This multi-room layout features a central structural spine dividing the Great Room and Kitchen zone from the four bedroom wing. The strategy prioritises RCC for all load-bearing elements due to the 9m external spans exceeding safe masonry thresholds.
+
+LOAD-BEARING WALLS (6 detected):
+RCC (Reinforced Concrete) scores 88% on the tradeoff model for load-bearing walls at 9m span. The outer boundary walls carry the full dead + live load of the structure. At this span length, traditional masonry (Red Brick, score 72%) is insufficient without additional columns. RCC's strength score of 4/4 is non-negotiable here.
+
+PARTITION WALLS (3 detected):
+AAC Blocks score 82% for partition walls. Since these walls carry zero structural load, cost-efficiency is weighted at 60%. AAC's low cost score (1/3) and adequate durability (3/3) make it the optimal choice. Fly Ash Brick is a sustainable alternative at 74%.
+
+FLOOR SLAB:
+RCC scores 91% for the floor slab — the highest in the database. A 4m typical room span is well within RCC's capabilities with standard reinforcement.
+
+COST ESTIMATE: ₹2,85,400 (material costs only, excludes labour and foundations).`
+    }
+  };
+}
+
+// ─────────────────────────────────────────────
+// FILE INPUT
+// ─────────────────────────────────────────────
+
+document.getElementById('file-input').addEventListener('change', function() {
+  const name = this.files[0]?.name || '';
+  document.getElementById('file-name').textContent = name ? `✓ ${name}` : '';
+});
+
+// Start
+initThree();
+</script>
+</body>
+</html>

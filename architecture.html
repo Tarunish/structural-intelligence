@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"/>
+<title>Architecture Diagram</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@800&display=swap');
+  body { background:#0a0a0f; margin:0; padding:2rem; font-family:'Space Mono',monospace; }
+  svg { display:block; margin:0 auto; }
+</style>
+</head>
+<body>
+<svg viewBox="0 0 900 580" xmlns="http://www.w3.org/2000/svg" width="900" height="580">
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#ff6b2b"/>
+    </marker>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="900" height="580" fill="#0a0a0f" rx="12"/>
+  <rect x="1" y="1" width="898" height="578" fill="none" stroke="#1e1e2e" stroke-width="1" rx="12"/>
+
+  <!-- Title -->
+  <text x="450" y="40" text-anchor="middle" fill="#e8e8f0" font-family="Space Mono" font-size="16" font-weight="700" letter-spacing="3">AUTONOMOUS STRUCTURAL INTELLIGENCE SYSTEM</text>
+  <text x="450" y="58" text-anchor="middle" fill="#6b6b80" font-family="Space Mono" font-size="9" letter-spacing="2">PS2 · AI/ML TRACK · ARCHITECTURE DIAGRAM</text>
+  <line x1="60" y1="68" x2="840" y2="68" stroke="#1e1e2e" stroke-width="1"/>
+
+  <!-- INPUT -->
+  <rect x="30" y="90" width="130" height="60" rx="8" fill="#12121a" stroke="#ff6b2b" stroke-width="1.5"/>
+  <text x="95" y="115" text-anchor="middle" fill="#ff6b2b" font-family="Space Mono" font-size="9" font-weight="700">INPUT</text>
+  <text x="95" y="130" text-anchor="middle" fill="#e8e8f0" font-family="Space Mono" font-size="8">Floor Plan Image</text>
+  <text x="95" y="143" text-anchor="middle" fill="#6b6b80" font-family="Space Mono" font-size="7">PNG / JPG</text>
+
+  <!-- Arrow -->
+  <line x1="160" y1="120" x2="195" y2="120" stroke="#ff6b2b" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- STAGE 1 -->
+  <rect x="200" y="90" width="140" height="60" rx="8" fill="#12121a" stroke="#ff6b2b" stroke-width="1.5" filter="url(#glow)"/>
+  <text x="270" y="108" text-anchor="middle" fill="#6b6b80" font-family="Space Mono" font-size="7">STAGE 1</text>
+  <text x="270" y="121" text-anchor="middle" fill="#ff6b2b" font-family="Space Mono" font-size="9" font-weight="700">FLOOR PLAN PARSER</text>
+  <text x="270" y="134" text-anchor="middle" fill="#e8e8f0" font-family="Space Mono" font-size="7">OpenCV · HoughLinesP</text>
+  <text x="270" y="145" text-anchor="middle" fill="#6b6b80" font-family="Space Mono" font-size="7">Contour Extraction</text>
+
+  <!-- Arrow down -->
+  <line x1="270" y1="150" x2="270" y2="185" stroke="#ff6b2b" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- STAGE 2 -->
+  <rect x="200" y="190" width="140" height="60" rx="8" fill="#12121a" stroke="#ff6b2b" stroke-width="1.5"/>
+  <text x="270" y="208" text-anchor="middle" fill="#6b6b80" font-family="Space Mono" font-size="7">STAGE 2</text>
+  <text x="270" y="221" text-anchor="middle" fill="#ff6b2b" font-family="Space Mono" font-size="9" font-weight="700">GEOMETRY RECON</text>
+  <text x="270" y="234" text-anchor="middle" fill="#e8e8f0" font-family="Space Mono" font-size="7">Wall Classification</text>
+  <text x="270" y="245" text-anchor="middle" fill="#6b6b80" font-family="Space Mono" font-size="7">Node-Edge Graph</text>
+
+  <!-- Arrow right to Stage 3 -->
+  <line x1="340" y1="220" x2="390" y2="220" stroke="#ff6b2b" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- STAGE 3 -->
+  <rect x="395" y="190" width="140" height="60" rx="8" fill="#12121a" stroke="#00d4aa" stroke-width="1.5" filter="url(#glow)"/>
+  <text x="465" y="208" text-anchor="middle" fill="#6b6b80" font-family="Space Mono" font-size="7">STAGE 3</text>
+  <text x="465" y="221" text-anchor="middle" fill="#00d4aa" font-family="Space Mono" font-size="9" font-weight="700">3D MODEL GEN</text>
+  <text x="465" y="234" text-anchor="middle" fill="#e8e8f0" font-family="Space Mono" font-size="7">Three.js Extrusion</text>
+  <text x="465" y="245" text-anchor="middle" fill="#6b6b80" font-family="Space Mono" font-size="7">Browser Viewer</text>
+
+  <!-- Arrow down from Stage 2 -->
+  <line x1="270" y1="250" x2="270" y2="285" stroke="#ff6b2b" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- STAGE 4 -->
+  <rect x="200" y="290" width="140" height="60" rx="8" fill="#12121a" stroke="#7c6af7" stroke-width="1.5"/>
+  <text x="270" y="308" text-anchor="middle" fill="#6b6b80" font-family="Space Mono" font-size="7">STAGE 4</text>
+  <text x="270" y="321" text-anchor="middle" fill="#7c6af7" font-family="Space Mono" font-size="9" font-weight="700">MATERIAL ANALYSIS</text>
+  <text x="270" y="334" text-anchor="middle" fill="#e8e8f0" font-family="Space Mono" font-size="7">Tradeoff Scoring</text>
+  <text x="270" y="345" text-anchor="middle" fill="#6b6b80" font-family="Space Mono" font-size="7">Cost × Strength × Dur.</text>
+
+  <!-- Material DB -->
+  <rect x="55" y="290" width="110" height="60" rx="6" fill="#0d0d16" stroke="#1e1e2e" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="110" y="315" text-anchor="middle" fill="#6b6b80" font-family="Space Mono" font-size="7">MATERIAL DB</text>
+  <text x="110" y="328" text-anchor="middle" fill="#6b6b80" font-family="Space Mono" font-size="7">AAC · RCC · Brick</text>
+  <text x="110" y="341" text-anchor="middle" fill="#6b6b80" font-family="Space Mono" font-size="7">Steel · Precast...</text>
+  <line x1="165" y1="320" x2="200" y2="320" stroke="#1e1e2e" stroke-width="1" stroke-dasharray="4,3"/>
+
+  <!-- Arrow down -->
+  <line x1="270" y1="350" x2="270" y2="385" stroke="#7c6af7" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- STAGE 5 -->
+  <rect x="200" y="390" width="140" height="60" rx="8" fill="#12121a" stroke="#7c6af7" stroke-width="1.5" filter="url(#glow)"/>
+  <text x="270" y="408" text-anchor="middle" fill="#6b6b80" font-family="Space Mono" font-size="7">STAGE 5</text>
+  <text x="270" y="421" text-anchor="middle" fill="#7c6af7" font-family="Space Mono" font-size="9" font-weight="700">LLM EXPLAINER</text>
+  <text x="270" y="434" text-anchor="middle" fill="#e8e8f0" font-family="Space Mono" font-size="7">Claude Sonnet API</text>
+  <text x="270" y="445" text-anchor="middle" fill="#6b6b80" font-family="Space Mono" font-size="7">Plain-English Report</text>
+
+  <!-- LLM API -->
+  <rect x="55" y="390" width="110" height="60" rx="6" fill="#0d0d16" stroke="#1e1e2e" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="110" y="415" text-anchor="middle" fill="#6b6b80" font-family="Space Mono" font-size="7">ANTHROPIC API</text>
+  <text x="110" y="428" text-anchor="middle" fill="#6b6b80" font-family="Space Mono" font-size="7">claude-sonnet</text>
+  <line x1="165" y1="420" x2="200" y2="420" stroke="#1e1e2e" stroke-width="1" stroke-dasharray="4,3"/>
+
+  <!-- FastAPI -->
+  <rect x="395" y="290" width="140" height="60" rx="8" fill="#0d0d16" stroke="#1e1e2e" stroke-width="1.5"/>
+  <text x="465" y="308" text-anchor="middle" fill="#6b6b80" font-family="Space Mono" font-size="7">BACKEND</text>
+  <text x="465" y="321" text-anchor="middle" fill="#e8e8f0" font-family="Space Mono" font-size="9" font-weight="700">FastAPI Server</text>
+  <text x="465" y="334" text-anchor="middle" fill="#6b6b80" font-family="Space Mono" font-size="7">REST API · Port 8000</text>
+  <text x="465" y="345" text-anchor="middle" fill="#6b6b80" font-family="Space Mono" font-size="7">/api/full-pipeline</text>
+  <line x1="340" y1="320" x2="390" y2="320" stroke="#1e1e2e" stroke-width="1" stroke-dasharray="4,3"/>
+
+  <!-- Frontend -->
+  <rect x="395" y="390" width="140" height="60" rx="8" fill="#0d0d16" stroke="#00d4aa" stroke-width="1.5"/>
+  <text x="465" y="408" text-anchor="middle" fill="#6b6b80" font-family="Space Mono" font-size="7">FRONTEND</text>
+  <text x="465" y="421" text-anchor="middle" fill="#00d4aa" font-family="Space Mono" font-size="9" font-weight="700">3D Viewer</text>
+  <text x="465" y="434" text-anchor="middle" fill="#6b6b80" font-family="Space Mono" font-size="7">Three.js · No build step</text>
+  <text x="465" y="445" text-anchor="middle" fill="#6b6b80" font-family="Space Mono" font-size="7">Upload → 3D → Report</text>
+  <line x1="465" y1="350" x2="465" y2="385" stroke="#1e1e2e" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+
+  <!-- WEB3 BONUS -->
+  <rect x="590" y="190" width="270" height="260" rx="10" fill="#0d0d16" stroke="#f5c518" stroke-width="1.5" stroke-dasharray="6,3"/>
+  <text x="725" y="212" text-anchor="middle" fill="#f5c518" font-family="Space Mono" font-size="9" font-weight="700">WEB3 BONUS — STELLAR BLOCKCHAIN</text>
+  
+  <rect x="610" y="225" width="110" height="55" rx="6" fill="#12121a" stroke="#f5c518" stroke-width="1"/>
+  <text x="665" y="245" text-anchor="middle" fill="#f5c518" font-family="Space Mono" font-size="8" font-weight="700">SOROBAN</text>
+  <text x="665" y="258" text-anchor="middle" fill="#e8e8f0" font-family="Space Mono" font-size="7">Smart Contract</text>
+  <text x="665" y="270" text-anchor="middle" fill="#6b6b80" font-family="Space Mono" font-size="7">Rust · store_analysis()</text>
+
+  <rect x="735" y="225" width="110" height="55" rx="6" fill="#12121a" stroke="#f5c518" stroke-width="1"/>
+  <text x="790" y="245" text-anchor="middle" fill="#f5c518" font-family="Space Mono" font-size="8" font-weight="700">STELLAR SDK</text>
+  <text x="790" y="258" text-anchor="middle" fill="#e8e8f0" font-family="Space Mono" font-size="7">JS Integration</text>
+  <text x="790" y="270" text-anchor="middle" fill="#6b6b80" font-family="Space Mono" font-size="7">Freighter Wallet</text>
+
+  <rect x="620" y="300" width="210" height="50" rx="6" fill="#0a0a0f" stroke="#1e1e2e" stroke-width="1"/>
+  <text x="725" y="320" text-anchor="middle" fill="#6b6b80" font-family="Space Mono" font-size="8">On-chain: plan_hash · walls · rooms</text>
+  <text x="725" y="333" text-anchor="middle" fill="#6b6b80" font-family="Space Mono" font-size="8">cost_inr · materials · timestamp</text>
+
+  <rect x="620" y="365" width="210" height="50" rx="6" fill="#0a0a0f" stroke="#1e1e2e" stroke-width="1"/>
+  <text x="725" y="383" text-anchor="middle" fill="#6b6b80" font-family="Space Mono" font-size="8">TESTNET EXPLORER</text>
+  <text x="725" y="397" text-anchor="middle" fill="#f5c518" font-family="Space Mono" font-size="7">stellar.expert/explorer/testnet</text>
+
+  <!-- Connection arrow to Web3 -->
+  <line x1="535" y1="420" x2="585" y2="320" stroke="#f5c518" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+
+  <!-- OUTPUT -->
+  <rect x="200" y="480" width="340" height="50" rx="8" fill="#12121a" stroke="#00d4aa" stroke-width="1.5" filter="url(#glow)"/>
+  <text x="370" y="498" text-anchor="middle" fill="#6b6b80" font-family="Space Mono" font-size="7">OUTPUT</text>
+  <text x="370" y="513" text-anchor="middle" fill="#00d4aa" font-family="Space Mono" font-size="10" font-weight="700">3D Model + Material Report + AI Explanation + Blockchain Audit</text>
+  <line x1="270" y1="450" x2="270" y2="478" stroke="#7c6af7" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="465" y1="450" x2="465" y2="478" stroke="#00d4aa" stroke-width="1" stroke-dasharray="4,3"/>
+
+  <!-- Score legend -->
+  <rect x="590" y="480" width="270" height="50" rx="6" fill="#0d0d16" stroke="#1e1e2e" stroke-width="1"/>
+  <text x="610" y="498" fill="#ff6b2b" font-family="Space Mono" font-size="7">■</text>
+  <text x="622" y="498" fill="#6b6b80" font-family="Space Mono" font-size="7">Load-Bearing (20+25 marks)</text>
+  <text x="610" y="512" fill="#00d4aa" font-family="Space Mono" font-size="7">■</text>
+  <text x="622" y="512" fill="#6b6b80" font-family="Space Mono" font-size="7">Partition / Explain (20+20 marks)</text>
+  <text x="750" y="498" fill="#7c6af7" font-family="Space Mono" font-size="7">■</text>
+  <text x="762" y="498" fill="#6b6b80" font-family="Space Mono" font-size="7">Material (25 marks)</text>
+  <text x="750" y="512" fill="#f5c518" font-family="Space Mono" font-size="7">■</text>
+  <text x="762" y="512" fill="#6b6b80" font-family="Space Mono" font-size="7">Web3 Bonus (+25)</text>
+</svg>
+</body>
+</html>
