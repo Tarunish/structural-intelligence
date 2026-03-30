@@ -25,7 +25,6 @@ Floor Plan Image
       ▼
 ┌─────────────────┐
 │  Stage 1: Parse │  OpenCV → walls, rooms, openings
-│  (OpenCV)       │
 └────────┬────────┘
          │
          ▼
@@ -62,14 +61,16 @@ Floor Plan Image
 ## Deployed Smart Contract Details
 
 **Network:** Stellar Testnet  
-**Contract ID:**`CCDNP7UJSSS77IQFWHHG6JOFRHM6IBTUZL5UGYXPV36F4KFMR76YNG3R`
+**Contract ID:** `CCDNP7UJSSS77IQFWHHG6JOFRHM6IBTUZL5UGYXPV36F4KFMR76YNG3R`
 
-**Screenshot of Block Explorer:** ![Contract Deployment](screenshots/contract-deployment.png)
+### Block Explorer Screenshots
+
+![Contract Deployment Transaction](screenshots/contract-deployment.png)
 ![Contract Explorer](screenshots/contract-explorer.png)
 
 ## UI Screenshots
 
-[Add screenshots of your running app]
+![3D Model - Sample Plan B](screenshots/ui-demo.png)
 
 ## Project Setup Guide
 
@@ -79,12 +80,18 @@ Floor Plan Image
 cd backend
 pip install -r requirements.txt
 export ANTHROPIC_API_KEY=your_key_here
-uvicorn main:app --reload --port 8000
+python -m uvicorn main:app --reload --port 8001
 ```
 
 ### Frontend
 
-Open `frontend/index.html` in any browser. No build step required.
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Open `http://localhost:5173` in Chrome.
 
 If backend is not running, click **"USE SAMPLE (Plan B)"** — the frontend works fully offline with embedded demo data.
 
@@ -92,7 +99,7 @@ If backend is not running, click **"USE SAMPLE (Plan B)"** — the frontend work
 
 ```bash
 # Install Stellar CLI
-cargo install --locked stellar-cli --features opt
+cargo install --locked stellar-cli
 
 # Build contract
 cd contracts/hello-world
@@ -100,9 +107,9 @@ stellar contract build
 
 # Deploy to testnet
 stellar contract deploy \
-  --wasm target/wasm32-unknown-unknown/release/structural_intelligence_contract.wasm \
+  --wasm target/wasm32v1-none/release/structural_intelligence_contract.wasm \
   --network testnet \
-  --source YOUR_ACCOUNT_NAME
+  --source myaccount
 
 # Update CONTRACT_ID in frontend/src/stellar-integration.js
 ```
@@ -117,7 +124,7 @@ python backend/parser/floor_plan_parser.py --image your_plan.png --output parsed
 python backend/materials/material_engine.py --parsed parsed.json
 
 # Or use the API
-curl -X POST http://localhost:8000/api/full-pipeline?use_fallback=true
+curl -X POST http://localhost:8001/api/full-pipeline?use_fallback=true
 ```
 
 ## Future Scope
@@ -133,6 +140,6 @@ curl -X POST http://localhost:8000/api/full-pipeline?use_fallback=true
 ## Tech Stack
 
 - **Backend:** Python, FastAPI, OpenCV, Shapely
-- **Frontend:** Vanilla JS, Three.js (r128), HTML/CSS
+- **Frontend:** React, Vite, Three.js (@react-three/fiber), Framer Motion
 - **AI/LLM:** Anthropic Claude Sonnet API
 - **Blockchain:** Stellar Soroban (Rust smart contract), Stellar SDK (JS)
