@@ -239,37 +239,42 @@ header {
 
 .canvas-overlay {
   position: absolute;
-  bottom: 2rem; left: 50%;
+  bottom: 1.5rem; left: 50%;
   transform: translateX(-50%);
-  display: flex; gap: 0.8rem;
-  padding: 0.5rem;
-  background: rgba(18, 18, 26, 0.7);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  display: flex; gap: 0.5rem;
+  padding: 0.6rem 0.8rem;
+  background: rgba(10, 10, 15, 0.92);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 14px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6);
   z-index: 20;
 }
 
 .cam-btn {
-  display: flex; align-items: center; gap: 0.4rem;
-  padding: 0.5rem 0.8rem;
-  background: transparent;
-  border: none;
-  border-radius: 6px;
-  color: var(--text-dim);
-  font-size: 0.7rem;
+  display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+  padding: 0.6rem 1.1rem;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  color: #e8e8f0;
+  font-size: 0.75rem;
   font-family: 'Space Mono', monospace;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  letter-spacing: 0.03em;
 }
 .cam-btn:hover { 
-  background: rgba(255,255,255,0.08); 
-  color: var(--text); 
+  background: rgba(255, 107, 43, 0.2);
+  border-color: rgba(255, 107, 43, 0.5);
+  color: #ff6b2b;
+  transform: translateY(-1px);
 }
 .cam-btn.active {
-  background: rgba(0, 229, 255, 0.1);
-  color: var(--accent2);
+  background: rgba(0, 229, 255, 0.15);
+  border-color: rgba(0, 229, 255, 0.4);
+  color: #00e5ff;
 }
 
 .loading-overlay {
