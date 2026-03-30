@@ -4,24 +4,45 @@ import { OrbitControls, Grid, Environment } from '@react-three/drei';
 import * as THREE from 'three';
 
 const MAT_COLORS = {
-  LOAD_BEARING: '#ff4d00',  // neon orange
-  PARTITION:    '#00e5ff',  // neon cyan
+  LOAD_BEARING: '#ff4d00',
+  PARTITION:    '#00e5ff',
   LONG_SPAN:    '#a0b4c8',
-  SLAB:         '#8a2be2',  // neon purple
+  SLAB:         '#8a2be2',
   COLUMN:       '#7c8a9a',
 };
 
 const WALL_HEIGHT = 3.2;
-const W = 14; 
+const W = 14;
 
 function filterWalls(walls) {
-  const MIN_LEN = 0.03;
-  return walls.filter(w => {
+  // Step 1: Remove very short walls
+  const MIN_LEN = 0.04;
+  let filtered = walls.filter(w => {
     const [x1, y1] = w.start || [0, 0];
     const [x2, y2] = w.end || [0, 0];
     const len = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
     return len >= MIN_LEN;
   });
+
+  // Step 2: Deduplicate walls that are very close to each other
+  const kept = [];
+  for (let i = 0; i < filtered.length; i++) {
+    const w1 = filtered[i];
+    const [ax1, ay1] = w1.start, [ax2, ay2] = w1.end;
+    const cx1 = (ax1 + ax2) / 2, cy1 = (ay1 + ay2) / 2;
+    let duplicate = false;
+    for (let j = 0; j < kept.length; j++) {
+      const w2 = kept[j];
+      const [bx1, by1] = w2.start, [bx2, by2] = w2.end;
+      const cx2 = (bx1 + bx2) / 2, cy2 = (by1 + by2) / 2;
+      const dist = Math.sqrt((cx1 - cx2) ** 2 + (cy1 - cy2) ** 2);
+      if (dist < 0.03) { duplicate = true; break; }
+    }
+    if (!duplicate) kept.push(w1);
+  }
+
+  // Step 3: Limit to max 80 walls to keep model clean
+  return kept.slice(0, 80);
 }
 
 const WallMesh = ({ wall, index, wireframe }) => {
@@ -41,8 +62,6 @@ const WallMesh = ({ wall, index, wireframe }) => {
   const posX = (x1 + x2) / 2;
   const posZ = (z1 + z2) / 2;
   const rotY = -Math.atan2(dz, dx);
-
-  // Offset height microscopically depending on index to completely eliminate Top-Face Z-Fighting
   const baseHeight = isLB ? WALL_HEIGHT : WALL_HEIGHT * 0.96;
   const h = baseHeight + (index * 0.001);
 
@@ -51,9 +70,9 @@ const WallMesh = ({ wall, index, wireframe }) => {
   return (
     <group position={[posX, h / 2, posZ]} rotation={[0, rotY, 0]}>
       <mesh castShadow geometry={geometry}>
-        <meshStandardMaterial 
-          color={color} 
-          roughness={0.7} 
+        <meshStandardMaterial
+          color={color}
+          roughness={0.7}
           metalness={0.2}
           wireframe={wireframe}
         />
@@ -81,35 +100,30 @@ const SceneContent = ({ parsedData, wireframe }) => {
 
   return (
     <group>
-      {/* Main Base Floor */}
       <mesh position={[W / 2, 0, W / 2]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <planeGeometry args={[W + 10, W + 10]} />
         <meshStandardMaterial color="#0a0a0f" roughness={1} metalness={0} />
       </mesh>
 
-      {/* Grid Floor */}
-      <Grid 
-        position={[W/2, 0.01, W/2]} 
-        args={[30, 30]} 
-        cellSize={1} 
-        cellThickness={0.5} 
-        cellColor="#1e1e2e" 
-        sectionSize={5} 
-        sectionThickness={1} 
-        sectionColor="#2a2a3e" 
-        fadeDistance={40} 
+      <Grid
+        position={[W/2, 0.01, W/2]}
+        args={[30, 30]}
+        cellSize={1}
+        cellThickness={0.5}
+        cellColor="#1e1e2e"
+        sectionSize={5}
+        sectionThickness={1}
+        sectionColor="#2a2a3e"
+        fadeDistance={40}
       />
 
-      {/* Room Floor Mats */}
       {rooms.map((room, i) => (
         <RoomFloor key={i} centroid={room.centroid_normalized || [0.5, 0.5]} index={i} />
       ))}
 
-      {/* Walls */}
       {walls.map((wall, i) => (
         <WallMesh key={i} wall={wall} index={i} wireframe={wireframe} />
       ))}
-
     </group>
   );
 };
@@ -130,10 +144,10 @@ const ThreeCanvas = React.forwardRef(({ parsedData, isLoading }, ref) => {
       const c = controlsRef.current.object;
       controlsRef.current.target.set(5, 1.5, 5);
       let r = 18, theta = Math.PI / 4, phi = Math.PI / 3.2;
-      
+
       if (view === 'top') { r = 20; theta = 0; phi = 0.01; }
       else if (view === 'front') { r = 18; theta = 0; phi = Math.PI / 2; }
-      
+
       c.position.set(
         r * Math.sin(phi) * Math.sin(theta) + 5,
         r * Math.cos(phi) + 1.5,
@@ -146,38 +160,36 @@ const ThreeCanvas = React.forwardRef(({ parsedData, isLoading }, ref) => {
 
   return (
     <main className="canvas-area">
-      <Canvas 
-        shadows 
+      <Canvas
+        shadows
         camera={{ position: [20, 18, 22], fov: 35 }}
         gl={{ antialias: true, alpha: true }}
       >
-        
-        {/* Cinematic Lighting Setup */}
         <ambientLight intensity={0.6} color="#ffffff" />
-        <directionalLight 
-          position={[15, 25, 15]} 
-          intensity={1.2} 
-          castShadow 
-          shadow-mapSize={[2048, 2048]} 
+        <directionalLight
+          position={[15, 25, 15]}
+          intensity={1.2}
+          castShadow
+          shadow-mapSize={[2048, 2048]}
           shadow-bias={-0.0005}
           color="#ffffff"
         />
         <pointLight position={[-10, 10, -10]} intensity={1.5} color="#00e5ff" />
         <pointLight position={[20, 5, 20]} intensity={1.0} color="#ff4d00" />
-        
+
         <Environment preset="city" />
 
         <SceneContent parsedData={parsedData} wireframe={wireframe} />
 
-        <OrbitControls 
+        <OrbitControls
           ref={controlsRef}
-          makeDefault 
+          makeDefault
           target={[5, 1.5, 5]}
-          enableDamping 
-          dampingFactor={0.05} 
+          enableDamping
+          dampingFactor={0.05}
           minDistance={2}
           maxDistance={40}
-          maxPolarAngle={Math.PI / 2 - 0.05} // Prevent going under the floor
+          maxPolarAngle={Math.PI / 2 - 0.05}
         />
       </Canvas>
 
