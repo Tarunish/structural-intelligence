@@ -26,18 +26,31 @@ export function getMockData() {
     },
     materials: {
       estimated_total_cost_inr: 285400,
+      cost_breakdown: {
+        load_bearing: 154100,
+        partition: 42000,
+        slab: 89300
+      },
       recommendations: [
         {
           element_type: 'LOAD_BEARING', span_m: 9.0,
-          structural_concerns: ['⚠️ Long unsupported span of 9.0m detected - steel frame or RCC required'],
+          structural_concerns: [
+            '⚠️ Long unsupported span of 9.0m detected - steel frame or RCC required',
+            '⚠️ Wind load shear risk on South-East face',
+            '⚠️ Foundation requires isolated footing due to high point load',
+            '⚠️ Settlement risk detected if soil bearing capacity < 150 kN/m²'
+          ],
           top_materials: [
-            { tradeoff_score: 0.88, material: { name: 'RCC', description: 'Reinforced concrete - highest structural capacity, ideal for slabs and columns', cost_score: 3, strength_score: 4, durability_score: 4, cost_per_sqm: 1200 } },
+            { tradeoff_score: 0.88, material: { name: 'RCC Frame', description: 'Reinforced concrete - highest structural capacity, ideal for slabs and columns', cost_score: 3, strength_score: 4, durability_score: 4, cost_per_sqm: 1200 } },
             { tradeoff_score: 0.72, material: { name: 'Red Brick', description: 'Traditional fired clay brick - reliable load-bearing, widely available', cost_score: 2, strength_score: 3, durability_score: 2, cost_per_sqm: 650 } },
           ]
         },
         {
           element_type: 'PARTITION', span_m: 4.5,
-          structural_concerns: [],
+          structural_concerns: [
+            '⚠️ Minor deflection expected on non-load bearing 4.5m span',
+            '⚠️ Ensure expansion joints are present every 3m'
+          ],
           top_materials: [
             { tradeoff_score: 0.82, material: { name: 'AAC Blocks', description: 'Autoclaved Aerated Concrete - lightweight, good insulation, easy to cut', cost_score: 1, strength_score: 2, durability_score: 3, cost_per_sqm: 450 } },
             { tradeoff_score: 0.74, material: { name: 'Fly Ash Brick', description: 'Eco-friendly industrial byproduct brick - good compressive strength, sustainable', cost_score: 1, strength_score: 2, durability_score: 3, cost_per_sqm: 420 } },
@@ -47,26 +60,29 @@ export function getMockData() {
           element_type: 'SLAB', span_m: 4.0,
           structural_concerns: [],
           top_materials: [
-            { tradeoff_score: 0.91, material: { name: 'RCC', description: 'Best-in-class for floor slabs - very high flexural strength, 50+ year durability', cost_score: 3, strength_score: 4, durability_score: 4, cost_per_sqm: 1200 } },
+            { tradeoff_score: 0.91, material: { name: 'Concrete Slab (RCC)', description: 'Best-in-class for floor slabs - very high flexural strength, 50+ year durability', cost_score: 3, strength_score: 4, durability_score: 4, cost_per_sqm: 1200 } },
+            { tradeoff_score: 0.65, material: { name: 'Hollow Core Plank', description: 'Precast prestressed concrete elements allowing rapid construction', cost_score: 4, strength_score: 4, durability_score: 3, cost_per_sqm: 1500 } }
           ]
         }
       ],
-      explanation: `STRUCTURAL MATERIAL ANALYSIS - PLAN B (4 Bedrooms / 3 Bathrooms)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      explanation: `### STRUCTURAL MATERIAL ANALYSIS
+**Plan B (4 Bedrooms / 3 Bathrooms)**
 
-OVERALL STRATEGY:
-This multi-room layout features a central structural spine dividing the Great Room and Kitchen zone from the four bedroom wing. The strategy prioritises RCC for all load-bearing elements due to the 9m external spans exceeding safe masonry thresholds.
+#### 🏗️ Overall Strategy
+This multi-room layout features a **central structural spine** dividing the Great Room and Kitchen zone from the four-bedroom wing. The strategy strongly prioritizes **RCC** for all load-bearing elements due to the **9m external spans** exceeding safe masonry thresholds.
 
-LOAD-BEARING WALLS (6 detected):
-RCC (Reinforced Concrete) scores 88% on the tradeoff model for load-bearing walls at 9m span. The outer boundary walls carry the full dead + live load of the structure. At this span length, traditional masonry (Red Brick, score 72%) is insufficient without additional columns. RCC's strength score of 4/4 is non-negotiable here.
+#### 🧱 Load-Bearing Walls (6 detected)
+**RCC (Reinforced Concrete)** scores **88%** on the tradeoff model for load-bearing walls at a 9m span. The outer boundary walls carry the full dead + live load of the structure.
+* At this span length, traditional masonry (**Red Brick**, score 72%) is structurally insufficient without additional columns.
+* RCC's strength score of **4/4** is non-negotiable here.
 
-PARTITION WALLS (3 detected):
-AAC Blocks score 82% for partition walls. Since these walls carry zero structural load, cost-efficiency is weighted at 60%. AAC's low cost score (1/3) and adequate durability (3/3) make it the optimal choice. Fly Ash Brick is a sustainable alternative at 74%.
+#### ⬛ Partition Walls (3 detected)
+**AAC Blocks** score **82%** for internal partition walls. Since these walls carry strictly zero structural load, cost-efficiency is heavily weighted at 60%.
+* AAC's low cost score (1/3) and solid durability (3/3) make it the optimal choice.
+* **Fly Ash Brick** is a great sustainable alternative at 74%.
 
-FLOOR SLAB:
-RCC scores 91% for the floor slab - the highest in the database. A 4m typical room span is well within RCC's capabilities with standard reinforcement.
-
-COST ESTIMATE: ₹2,85,400 (material costs only, excludes labour and foundations).`
+#### 🔲 Floor Slab
+**RCC Slab** scores **91%**, the highest in the database. A **4m typical room span** is well within RCC's capabilities utilizing a standard single-mat reinforcement layout.`
     }
   };
 }

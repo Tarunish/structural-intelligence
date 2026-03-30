@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { motion } from 'framer-motion';
 import ThreeCanvas from './components/ThreeCanvas';
 import SidebarLeft from './components/SidebarLeft';
 import SidebarRight from './components/SidebarRight';
@@ -27,26 +28,27 @@ function App() {
 
     try {
       let data;
-      try {
-        const formData = new FormData();
-        if (!useSample && file) formData.append('file', file);
-
-        const endpoint = useSample
-          ? `${API}/api/full-pipeline?use_fallback=true`
-          : `${API}/api/full-pipeline`;
-
-        const res = await fetch(endpoint, {
-          method: 'POST',
-          body: useSample ? null : formData,
-          signal: AbortSignal.timeout(30000)
-        });
-
-        if (!res.ok) throw new Error(`API ${res.status}`);
-        data = await res.json();
-      } catch (apiErr) {
-        console.warn('API unavailable, using embedded mock data:', apiErr);
-        await new Promise(r => setTimeout(r, 800));
+      if (useSample) {
+        await new Promise(r => setTimeout(r, 800)); // Simulate delay
         data = getMockData();
+      } else {
+        try {
+          const formData = new FormData();
+          formData.append('file', file);
+
+          const res = await fetch(`${API}/api/full-pipeline`, {
+            method: 'POST',
+            body: formData,
+            signal: AbortSignal.timeout(30000)
+          });
+
+          if (!res.ok) throw new Error(`API ${res.status}`);
+          data = await res.json();
+        } catch (apiErr) {
+          console.warn('API unavailable, using embedded mock data:', apiErr);
+          await new Promise(r => setTimeout(r, 800));
+          data = getMockData();
+        }
       }
 
       setParsedData(data.parsed);
@@ -62,18 +64,27 @@ function App() {
     setIsLoading(false);
   };
 
+  const isAnalyzing = status === 'ANALYZING...';
+
   return (
     <>
-      <header>
+      <motion.header 
+        initial={{ y: -70 }} 
+        animate={{ y: 0 }} 
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+      >
         <div className="logo">STRUCTURAL<span>.</span>AI</div>
-        <div className="status-pill">
+        <motion.div 
+          className={`status-pill ${isAnalyzing ? 'analyzing' : ''}`}
+          layout
+        >
           <div className="status-dot"></div>
           <span>{status}</span>
+        </motion.div>
+        <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', letterSpacing: '0.05em' }}>
+          <span className="mono">PS2</span> · Autonomous Structural Intelligence
         </div>
-        <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)' }}>
-          PS2 · Autonomous Structural Intelligence
-        </div>
-      </header>
+      </motion.header>
 
       <div className="app">
         <SidebarLeft 
@@ -84,11 +95,18 @@ function App() {
           parsedData={parsedData}
         />
         
-        <ThreeCanvas 
-          ref={canvasRef} 
-          parsedData={parsedData} 
-          isLoading={isLoading} 
-        />
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          style={{ position: 'relative', width: '100%', height: '100%' }}
+        >
+          <ThreeCanvas 
+            ref={canvasRef} 
+            parsedData={parsedData} 
+            isLoading={isLoading} 
+          />
+        </motion.div>
         
         <SidebarRight 
           parsedData={parsedData} 

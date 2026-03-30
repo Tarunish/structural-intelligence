@@ -62,8 +62,10 @@ Floor Plan Image
 ## Deployed Smart Contract Details
 
 **Network:** Stellar Testnet  
-**Contract ID:** `[REPLACE WITH YOUR CONTRACT ID AFTER DEPLOYMENT]`  
-**Screenshot of Block Explorer:** [Add after deployment]
+**Contract ID:**`CCDNP7UJSSS77IQFWHHG6JOFRHM6IBTUZL5UGYXPV36F4KFMR76YNG3R`
+
+**Screenshot of Block Explorer:** ![Contract Deployment](screenshots/contract-deployment.png)
+![Contract Explorer](screenshots/contract-explorer.png)
 
 ## UI Screenshots
 
